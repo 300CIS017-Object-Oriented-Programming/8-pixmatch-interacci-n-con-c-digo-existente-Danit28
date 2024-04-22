@@ -72,47 +72,61 @@ def ReduceGapFromPageTop(wch_section = 'main page'):
 
 # La siguiente funcion se encarga de los pasados participantes y sus puntaciones
 # Esta tiene 3 funciones prinicpales
+
+
 def Leaderboard(what_to_do):
     # Esta parte se encarga de crear la tabla de clasificacion, de los puntajes
     if what_to_do == 'create':
-        if mystate.GameDetails[3] != '':
-            if os.path.isfile(vpth + 'leaderboard.json') == False:
-                tmpdict = {}
-                json.dump(tmpdict, open(vpth + 'leaderboard.json', 'w'))     # write file
+        # Crea la tabla de clasificación si no existe y el nombre del jugador está proporcionado
+        if mystate.GameDetails[3] != '' and not os.path.isfile(vpth + 'leaderboard.json'):
+            tmpdict = {}
+            json.dump(tmpdict, open(vpth + 'leaderboard.json', 'w'))  # Escribir archivo
 
-    # Se encarga de escribir los nuevos puntajes de la tabla de clasificacion
     elif what_to_do == 'write':
-        if mystate.GameDetails[3] != '':       # record in leaderboard only if player name is provided
+        # Guarda el puntaje del jugador en la tabla de clasificación si el nombre está proporcionado
+        if mystate.GameDetails[3] != '':
             if os.path.isfile(vpth + 'leaderboard.json'):
-                leaderboard = json.load(open(vpth + 'leaderboard.json'))    # read file
+                leaderboard = json.load(open(vpth + 'leaderboard.json'))  # Leer archivo
                 leaderboard_dict_lngth = len(leaderboard)
-                    
-                leaderboard[str(leaderboard_dict_lngth + 1)] = {'NameCountry': mystate.GameDetails[3], 'HighestScore': mystate.myscore}
-                leaderboard = dict(sorted(leaderboard.items(), key=lambda item: item[1]['HighestScore'], reverse=True))  # sort desc
 
-                if len(leaderboard) > 3:
-                    for i in range(len(leaderboard)-3): leaderboard.popitem()    # rmv last kdict ey
+                leaderboard[str(leaderboard_dict_lngth + 1)] = {'NameCountry': mystate.GameDetails[3],
+                                                                'HighestScore': mystate.myscore}
+                leaderboard = dict(sorted(leaderboard.items(), key=lambda item: item[1]['HighestScore'],
+                                          reverse=True))  # Ordenar de forma descendente
 
-                json.dump(leaderboard, open(vpth + 'leaderboard.json', 'w'))     # write file
+                if len(leaderboard) > 4:  # Mostrar los cuatro principales jugadores
+                    for i in range(len(leaderboard) - 4):
+                        leaderboard.popitem()  # Eliminar último jugador
 
-    # Esta parte se encarga de leer los nuevos puntajes y mostrarlos en la pagina
+                json.dump(leaderboard, open(vpth + 'leaderboard.json', 'w'))  # Escribir archivo
+
     elif what_to_do == 'read':
-        if mystate.GameDetails[3] != '':       # record in leaderboard only if player name is provided
+        # Leer puntajes y mostrar a los cuatro principales jugadores en la interfaz gráfica
+        if mystate.GameDetails[3] != '':
             if os.path.isfile(vpth + 'leaderboard.json'):
-                leaderboard = json.load(open(vpth + 'leaderboard.json'))    # read file
-                    
-                leaderboard = dict(sorted(leaderboard.items(), key=lambda item: item[1]['HighestScore'], reverse=True))  # sort desc
+                leaderboard = json.load(open(vpth + 'leaderboard.json'))  # Leer archivo
 
-                sc0, sc1, sc2, sc3 = st.columns((2,3,3,3))
+                leaderboard = dict(sorted(leaderboard.items(), key=lambda item: item[1]['HighestScore'],
+                                          reverse=True))  # Ordenar de forma descendente
+
+                sc0, sc1, sc2, sc3, sc4 = st.columns((2, 2, 2, 2, 2))
                 rknt = 0
                 for vkey in leaderboard.keys():
                     if leaderboard[vkey]['NameCountry'] != '':
                         rknt += 1
                         if rknt == 1:
-                            sc0.write('🏆 Past Winners:')
-                            sc1.write(f"🥇 | {leaderboard[vkey]['NameCountry']}: :red[{leaderboard[vkey]['HighestScore']}]")
-                        elif rknt == 2: sc2.write(f"🥈 | {leaderboard[vkey]['NameCountry']}: :red[{leaderboard[vkey]['HighestScore']}]")
-                        elif rknt == 3: sc3.write(f"🥈 | {leaderboard[vkey]['NameCountry']}: :red[{leaderboard[vkey]['HighestScore']}]")
+                            sc0.write('🏆 Top Players:')
+                            sc1.write(
+                                f"🥇 | {leaderboard[vkey]['NameCountry']}: **{leaderboard[vkey]['HighestScore']}**")
+                        elif rknt == 2:
+                            sc2.write(
+                                f"🥈 | {leaderboard[vkey]['NameCountry']}: **{leaderboard[vkey]['HighestScore']}**")
+                        elif rknt == 3:
+                            sc3.write(
+                                f"🥉 | {leaderboard[vkey]['NameCountry']}: **{leaderboard[vkey]['HighestScore']}**")
+                        elif rknt == 4:
+                            sc4.write(
+                                f"4️⃣ | {leaderboard[vkey]['NameCountry']}: **{leaderboard[vkey]['HighestScore']}**")
 
 # Esta funcion se usa para la pagina principal antes del inicio del juego
 def InitialPage():
