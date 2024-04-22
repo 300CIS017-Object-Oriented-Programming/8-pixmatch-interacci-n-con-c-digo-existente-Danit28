@@ -7,13 +7,16 @@ import json
 from PIL import Image
 from streamlit_autorefresh import st_autorefresh
 
+
+##Configurar el diseño de la pestaña de la pagina
 st.set_page_config(page_title = "PixMatch", page_icon="🕹️", layout = "wide", initial_sidebar_state = "expanded")
 
+## Acceder a la ruta para los archivos
 vDrive = os.path.splitdrive(os.getcwd())[0]
 if vDrive == "C:":
-    vpth = (r"C:\Users\danie\OneDrive\Escritorio\University Shit\Octavo Semestre\Programacion Orientada a Objetos\8-pixmatch-interacci-n-con-c-digo-existente-Danit28/ ")   # local developer's disc
+    vpth = r"C:\Users\danie\OneDrive\Escritorio\University Shit\Octavo Semestre\Programacion Orientada a Objetos\8-pixmatch-interacci-n-con-c-digo-existente-Danit28/"   # local developer's disc
 
-
+##Ajustes del diseño de la pagina
 sbe = """<span style='font-size: 140px;
                       border-radius: 7px;
                       text-align: center;
@@ -26,6 +29,7 @@ sbe = """<span style='font-size: 140px;
                       |fill_variable|
                       </span>"""
 
+#Diseño de los emojis
 pressed_emoji = """<span style='font-size: 24px;
                                 border-radius: 7px;
                                 text-align: center;
@@ -38,6 +42,7 @@ pressed_emoji = """<span style='font-size: 24px;
                                 |fill_variable|
                                 </span>"""
 
+##Diseño de la barra horizontal
 horizontal_bar = "<hr style='margin-top: 0; margin-bottom: 0; height: 1px; border: 1px solid #635985;'><br>"    # thin divider line
 purple_btn_colour = """
                         <style>
@@ -47,6 +52,7 @@ purple_btn_colour = """
                         </style>
                     """
 
+##Se inicializan las variables del codigo
 mystate = st.session_state
 if "expired_cells" not in mystate: mystate.expired_cells = []
 if "myscore" not in mystate: mystate.myscore = 0
@@ -55,21 +61,26 @@ if "sidebar_emoji" not in mystate: mystate.sidebar_emoji = ''
 if "emoji_bank" not in mystate: mystate.emoji_bank = []
 if "GameDetails" not in mystate: mystate.GameDetails = ['Medium', 6, 7, '']  # difficulty level, sec interval for autogen, total_cells_per_row_or_col, player name
 
-# common functions
+# Arreglar el diseño de la pagina
 def ReduceGapFromPageTop(wch_section = 'main page'):
     if wch_section == 'main page': st.markdown(" <style> div[class^='block-container'] { padding-top: 2rem; } </style> ", True) # main area
     elif wch_section == 'sidebar': st.markdown(" <style> div[class^='st-emotion-cache-10oheav'] { padding-top: 0rem; } </style> ", True) # sidebar
     elif wch_section == 'all': 
         st.markdown(" <style> div[class^='block-container'] { padding-top: 2rem; } </style> ", True) # main area
         st.markdown(" <style> div[class^='st-emotion-cache-10oheav'] { padding-top: 0rem; } </style> ", True) # sidebar
-    
+
+
+# La siguiente funcion se encarga de los pasados participantes y sus puntaciones
+# Esta tiene 3 funciones prinicpales
 def Leaderboard(what_to_do):
+    # Esta parte se encarga de crear la tabla de clasificacion, de los puntajes
     if what_to_do == 'create':
         if mystate.GameDetails[3] != '':
             if os.path.isfile(vpth + 'leaderboard.json') == False:
                 tmpdict = {}
                 json.dump(tmpdict, open(vpth + 'leaderboard.json', 'w'))     # write file
 
+    # Se encarga de escribir los nuevos puntajes de la tabla de clasificacion
     elif what_to_do == 'write':
         if mystate.GameDetails[3] != '':       # record in leaderboard only if player name is provided
             if os.path.isfile(vpth + 'leaderboard.json'):
@@ -84,6 +95,7 @@ def Leaderboard(what_to_do):
 
                 json.dump(leaderboard, open(vpth + 'leaderboard.json', 'w'))     # write file
 
+    # Esta parte se encarga de leer los nuevos puntajes y mostrarlos en la pagina
     elif what_to_do == 'read':
         if mystate.GameDetails[3] != '':       # record in leaderboard only if player name is provided
             if os.path.isfile(vpth + 'leaderboard.json'):
@@ -102,6 +114,7 @@ def Leaderboard(what_to_do):
                         elif rknt == 2: sc2.write(f"🥈 | {leaderboard[vkey]['NameCountry']}: :red[{leaderboard[vkey]['HighestScore']}]")
                         elif rknt == 3: sc3.write(f"🥈 | {leaderboard[vkey]['NameCountry']}: :red[{leaderboard[vkey]['HighestScore']}]")
 
+# Esta funcion se usa para la pagina principal antes del inicio del juego
 def InitialPage():
     with st.sidebar:
         st.subheader("🖼️ Pix Match:")
@@ -112,6 +125,7 @@ def InitialPage():
         st.image(sidebarlogo, use_column_width='auto')
 
     # ViewHelp
+    # Se listan las instrucciones del juego
     hlp_dtl = f"""<span style="font-size: 26px;">
     <ol>
     <li style="font-size:15px";>Game play opens with (a) a sidebar picture and (b) a N x N grid of picture buttons, where N=6:Easy, N=7:Medium, N=8:Hard.</li>
@@ -123,20 +137,24 @@ def InitialPage():
     <li style="font-size:15px";>At the end of the game, if you have a positive score, you will have <strong>won</strong>; otherwise, you will have <strong>lost</strong>.</li>
     </ol></span>""" 
 
+    #Se muestran las imagenes
     sc1, sc2 = st.columns(2)
     random.seed()
     GameHelpImg = vpth + random.choice(["MainImg1.jpg", "MainImg2.jpg", "MainImg3.jpg", "MainImg4.jpg"])
     GameHelpImg = Image.open(GameHelpImg).resize((550, 550))
     sc2.image(GameHelpImg, use_column_width='auto')
 
+    #Se muestran los encabezados
     sc1.subheader('Rules | Playing Instructions:')
     sc1.markdown(horizontal_bar, True)
     sc1.markdown(hlp_dtl, unsafe_allow_html=True)
     st.markdown(horizontal_bar, True)
 
+    #Nota del autor
     author_dtl = "<strong>Happy Playing: 😎 Shawn Pereira: shawnpereira1969@gmail.com</strong>"
     st.markdown(author_dtl, unsafe_allow_html=True)
 
+#La siguiente funcion se utiliza unicamente para leer las imagenes
 def ReadPictureFile(wch_fl):
     try:
         pxfl = f"{vpth}{wch_fl}"
@@ -144,10 +162,13 @@ def ReadPictureFile(wch_fl):
 
     except: return ""
 
+# La siguiente funcion se utiliza al presionar una celda
 def PressedCheck(vcell):
     if mystate.plyrbtns[vcell]['isPressed'] == False:
         mystate.plyrbtns[vcell]['isPressed'] = True
         mystate.expired_cells.append(vcell)
+
+        # Si la respuesta es correcta se añade al puntaje lo correspondiente a la dificultad
 
         if mystate.plyrbtns[vcell]['eMoji'] == mystate.sidebar_emoji:
             mystate.plyrbtns[vcell]['isTrueFalse'] = True
@@ -156,17 +177,21 @@ def PressedCheck(vcell):
             if mystate.GameDetails[0] == 'Easy': mystate.myscore += 5
             elif mystate.GameDetails[0] == 'Medium': mystate.myscore += 3
             elif mystate.GameDetails[0] == 'Hard': mystate.myscore += 1
-        
+
+        #Si es incorrecta al puntaje se le resta 1
         else:
             mystate.plyrbtns[vcell]['isTrueFalse'] = False
             mystate.myscore -= 1
 
+# La funcion se utiliza al momento de que pase el tiempo y sea necesario volver a generar los emojis
 def ResetBoard():
     total_cells_per_row_or_col = mystate.GameDetails[2]
 
     sidebar_emoji_no = random.randint(1, len(mystate.emoji_bank))-1
     mystate.sidebar_emoji = mystate.emoji_bank[sidebar_emoji_no]
 
+    # Si se ha presionado la celda entonces no se cambia, mientras que si esta presionada si se cambia
+    # Se elige de la lista de emojis definida anteriormente
     sidebar_emoji_in_list = False
     for vcell in range(1, ((total_cells_per_row_or_col ** 2)+1)):
         rndm_no = random.randint(1, len(mystate.emoji_bank))-1
@@ -183,6 +208,9 @@ def ResetBoard():
             lptr = flst[lptr]
             mystate.plyrbtns[lptr]['eMoji'] = mystate.sidebar_emoji
 
+
+#Se establecen los emojis que se utilizaran en el juego
+#Esta funcion se encarga de establecer como se vera el juego antes de empezar
 def PreNewGame():
     total_cells_per_row_or_col = mystate.GameDetails[2]
     mystate.expired_cells = []
@@ -202,6 +230,8 @@ def PreNewGame():
     blue_signs = ['🚾', '♿️', '🅿️', '🈂️', '🛂', '🛃', '🛄', '🛅', '🚹', '🚺', '🚻', '🚮', '🎦', '📶', '🈁', '🔣', '🔤', '🔡', '🔠', '🆖', '🆗', '🆙', '🆒', '🆕', '🆓', '0️⃣', '1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣', '🔟', '🔢', '⏏️', '▶️', '⏸', '⏯', '⏹', '⏺', '⏭', '⏮', '⏩', '⏪', '⏫', '⏬', '◀️', '🔼', '🔽', '➡️', '⬅️', '⬆️', '⬇️', '↗️', '↘️', '↙️', '↖️', '↪️', '↩️', '⤴️', '⤵️', '🔀', '🔁', '🔂', '🔄', '🔃', '➿', '🔚', '🔙', '🔛', '🔝', '🔜']
     moon = ['🌕', '🌔', '🌓', '🌗', '🌒', '🌖', '🌑', '🌜', '🌛', '🌙']
 
+    ##Dependiendo de la dificultad elegida se utilizan diferentes emojis
+    #En cada if se inicializa de manera aleatoria los emojis elegidos
     random.seed()
     if mystate.GameDetails[0] == 'Easy':
         wch_bank = random.choice(['foods', 'moon', 'animals'])
@@ -218,6 +248,8 @@ def PreNewGame():
     mystate.plyrbtns = {}
     for vcell in range(1, ((total_cells_per_row_or_col ** 2)+1)): mystate.plyrbtns[vcell] = {'isPressed': False, 'isTrueFalse': False, 'eMoji': ''}
 
+
+#Definir los emojis que se van a utilizar dependiendo del puntaje obtenido
 def ScoreEmoji():
     if mystate.myscore == 0: return '😐'
     elif -5 <= mystate.myscore <= -1: return '😏'
@@ -227,10 +259,12 @@ def ScoreEmoji():
     elif 6 <= mystate.myscore <= 10: return '😊'
     elif mystate.myscore > 10: return '😁'
 
+#Se utiliza la funcion NewGame para inicializar el juego
 def NewGame():
     ResetBoard()
     total_cells_per_row_or_col = mystate.GameDetails[2]
 
+    # Primero empezamos definiendo el dseño del juego e inicializando las variables
     ReduceGapFromPageTop('sidebar')
     with st.sidebar:
         st.subheader(f"🖼️ Pix Match: {mystate.GameDetails[0]}")
@@ -252,13 +286,14 @@ def NewGame():
     st.subheader("Picture Positions:")
     st.markdown(horizontal_bar, True)
 
-    # Set Board Dafaults
+    # Set Board Defaults
     st.markdown("<style> div[class^='css-1vbkxwb'] > p { font-size: 1.5rem; } </style> ", unsafe_allow_html=True)  # make button face big
 
     for i in range(1, (total_cells_per_row_or_col+1)):
         tlst = ([1] * total_cells_per_row_or_col) + [2] # 2 = rt side padding
         globals()['cols' + str(i)] = st.columns(tlst)
-    
+
+    #Se reemplazan las celdas con cada uno de los emojis
     for vcell in range(1, (total_cells_per_row_or_col ** 2)+1):
         if 1 <= vcell <= (total_cells_per_row_or_col * 1):
             arr_ref = '1'
@@ -299,7 +334,8 @@ def NewGame():
         elif ((total_cells_per_row_or_col * 9)+1) <= vcell <= (total_cells_per_row_or_col * 10):
             arr_ref = '10'
             mval = (total_cells_per_row_or_col * 9)
-            
+
+        #Ahora dependiendo de si el emoji presionado es el correcto, este se reemplaza con una x o una flecha
         globals()['cols' + arr_ref][vcell-mval] = globals()['cols' + arr_ref][vcell-mval].empty()
         if mystate.plyrbtns[vcell]['isPressed'] == True:
             if mystate.plyrbtns[vcell]['isTrueFalse'] == True:
@@ -315,6 +351,7 @@ def NewGame():
     st.caption('') # vertical filler
     st.markdown(horizontal_bar, True)
 
+    # Si ya se han utilizado todas las celdas entonces dependiendo de si el puntaje es positivo o negativo, se gana o se pierde
     if len(mystate.expired_cells) == (total_cells_per_row_or_col ** 2):
         Leaderboard('write')
 
@@ -325,15 +362,18 @@ def NewGame():
         mystate.runpage = Main
         st.rerun()
 
+#El main el cual muestra la pagina inicial y define la dificultad original
 def Main():
     st.markdown('<style>[data-testid="stSidebar"] > div:first-child {width: 310px;}</style>', unsafe_allow_html=True,)  # reduce sidebar width
     st.markdown(purple_btn_colour, unsafe_allow_html=True)
 
+    ##Empieza mostrano los niveles de dificultad disponibles, al igual que el nombre del jugador
     InitialPage()
     with st.sidebar:
         mystate.GameDetails[0] = st.radio('Difficulty Level:', options=('Easy', 'Medium', 'Hard'), index=1, horizontal=True, )
         mystate.GameDetails[3] = st.text_input("Player Name, Country", placeholder='Shawn Pereira, India', help='Optional input only for Leaderboard')
 
+        #Dependiendo de la dificultad que eliga el jugador se inicializa con un intervalo de segundos especifico y de puntos
         if st.button(f"🕹️ New Game", use_container_width=True):
 
             if mystate.GameDetails[0] == 'Easy':
@@ -348,10 +388,14 @@ def Main():
                 mystate.GameDetails[1] = 5         # secs interval
                 mystate.GameDetails[2] = 8         # total_cells_per_row_or_col
 
+            #Se crea el tablero
             Leaderboard('create')
 
+            #Se llama a la funcion PreNewGame para preparar la pantalla para el juego
             PreNewGame()
+            #Se llama la funcion NewGame para empezar el juego
             mystate.runpage = NewGame
+            #Se corre con streamlit
             st.rerun()
 
         st.markdown(horizontal_bar, True)

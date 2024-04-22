@@ -10,5 +10,10 @@
   - Medio: cada 6 segundos.
   - Difícil: cada 5 segundos.
 
+### 2. Presentacion de la tabla de calificacion 
+**Requisito:** El sistema debe mostrar los jugadores con puntajes mas alto, junto con su nombre y pais
 
-> Agrega el resto de requisitos siguiendo una estructura similar a la del ejemplo
+**Criterios de Aceptación:**
+- El sistema debe de poder aceptar una entrada del nombre y pais del jugador 
+- El puntaje debe guardarse sin importar si se cierra el juego o no 
+- Dependiendo de la dificultad del juego cambia el puntaje 
