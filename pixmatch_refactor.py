@@ -73,7 +73,6 @@ def ReduceGapFromPageTop(wch_section = 'main page'):
 # La siguiente funcion se encarga de los pasados participantes y sus puntaciones
 # Esta tiene 3 funciones prinicpales
 
-
 def Leaderboard(what_to_do):
     # Esta parte se encarga de crear la tabla de clasificacion, de los puntajes
     if what_to_do == 'create':
